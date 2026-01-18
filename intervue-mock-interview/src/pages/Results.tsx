@@ -8,6 +8,7 @@ import {
   Code2, 
   Clock, 
   CheckCircle2, 
+  TrendingUp,
   RotateCcw,
   Download,
   Share2,
