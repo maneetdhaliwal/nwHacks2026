@@ -155,6 +155,43 @@ const Interview = () => {
         return;
       }
 
+      if (!selectedProblem) {
+        console.error('No problem selected');
+        const errorMessage = 'No problem selected for the interview.';
+        addMessage('ai', errorMessage);
+        speakMessage(errorMessage);
+        return;
+      }
+
+      const systemMessage = {
+        role: 'system',
+        content: `You are conducting a coding interview for the following problem:
+
+Title: ${selectedProblem.title}
+
+Difficulty: ${selectedProblem.difficulty}
+
+Description: ${selectedProblem.description}
+
+Examples:
+${selectedProblem.examples.map(ex => `- ${ex}`).join('\n')}
+
+Test Cases:
+${selectedProblem.testCases.map(tc => `- Input: ${JSON.stringify(tc.input)}, Expected: ${JSON.stringify(tc.expected)}, Description: ${tc.description}`).join('\n')}
+
+IMPORTANT: All code examples, hints, solutions, and discussions must be in JavaScript only. Do not mention or suggest solutions in any other programming language (Python, Java, etc.). When providing code snippets or algorithmic hints, always use JavaScript syntax and concepts.
+
+Please act as a professional coding interviewer. Ask relevant questions about the candidate's approach, provide feedback on their JavaScript code, and guide them through solving this problem using JavaScript. Maintain a conversational tone and be encouraging.`
+      };
+
+      const apiMessages = [
+        systemMessage,
+        ...conversationMessages.map(m => ({ 
+          role: m.role === 'ai' ? 'assistant' : m.role, 
+          content: m.content 
+        }))
+      ];
+
       const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
         method: 'POST',
         headers: {
@@ -163,10 +200,7 @@ const Interview = () => {
         },
         body: JSON.stringify({
           model: 'anthropic/claude-3-haiku',
-          messages: conversationMessages.map(m => ({ 
-            role: m.role === 'ai' ? 'assistant' : m.role, 
-            content: m.content 
-          })),
+          messages: apiMessages,
         }),
       });
 
@@ -180,7 +214,7 @@ const Interview = () => {
       addMessage('ai', errorMessage);
       speakMessage(errorMessage);
     }
-  }, [addMessage, speakMessage]);
+  }, [addMessage, speakMessage, selectedProblem]);
 
   // Setup speech recognition
   useEffect(() => {
@@ -216,13 +250,6 @@ const Interview = () => {
       setPendingAICall(false);
     }
   }, [pendingAICall, messages, callAI]);
-
-  // Show code panel after some conversation
-  useEffect(() => {
-    if (messages.length >= 4) {
-      setShowCodePanel(true);
-    }
-  }, [messages.length]);
   
   const handleSelectProblem = (problem: CodingProblem) => {
     setSelectedProblem(problem);
@@ -231,6 +258,7 @@ const Interview = () => {
   const handleStartInterview = () => {
     if (selectedProblem) {
       setInterviewStarted(true);
+      setShowCodePanel(true); // Show code panel immediately so user can see the problem
       // Add initial AI message
       const initialMessage = selectedProblem.aiConversation[0].content;
       addMessage('ai', initialMessage);
