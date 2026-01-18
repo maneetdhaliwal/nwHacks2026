@@ -8,7 +8,6 @@ import {
   Code2, 
   Clock, 
   CheckCircle2, 
-  TrendingUp,
   RotateCcw,
   Download,
   Share2,
@@ -311,15 +310,6 @@ Provide detailed feedback on the candidate's actual performance.`;
                 <div>
                   <p className="text-muted-foreground text-sm">Questions</p>
                   <p className="font-semibold">{questionsAnswered} answered</p>
-                </div>
-              </div>
-              <div className="flex items-center gap-3 col-span-2 md:col-span-1">
-                <div className="flex justify-center items-center bg-primary/10 rounded-lg w-10 h-10">
-                  <TrendingUp className="w-5 h-5 text-primary" />
-                </div>
-                <div>
-                  <p className="text-muted-foreground text-sm">Trend</p>
-                  <p className="font-semibold text-success">+12% improvement</p>
                 </div>
               </div>
             </div>
