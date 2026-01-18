@@ -108,40 +108,40 @@ const Interview = () => {
   };
   
   return (
-    <div className="min-h-screen bg-background flex flex-col">
+    <div className="bg-background flex min-h-screen flex-col">
       <Header />
       
       <main className="flex-1 pt-16">
-        <div className="h-[calc(100vh-4rem)] flex">
+        <div className="flex h-[calc(100vh-4rem)]">
           {/* Mode Tabs - Mobile */}
-          <div className="md:hidden fixed bottom-0 left-0 right-0 z-20 border-t border-border bg-card/95 backdrop-blur-sm flex">
+          <div className="bg-card/95 border-border fixed bottom-0 left-0 right-0 z-20 flex border-t backdrop-blur-sm md:hidden">
             <button
               onClick={() => setShowCodePanel(false)}
               className={cn(
-                "flex-1 flex items-center justify-center gap-2 py-4 transition-colors",
+                "flex flex-1 justify-center items-center gap-2 py-4 transition-colors",
                 !showCodePanel ? "text-primary" : "text-muted-foreground"
               )}
             >
-              <MessageSquare className="w-5 h-5" />
+              <MessageSquare className="h-5 w-5" />
               <span className="text-sm font-medium">Chat</span>
             </button>
             <button
               onClick={() => setShowCodePanel(true)}
               className={cn(
-                "flex-1 flex items-center justify-center gap-2 py-4 transition-colors",
+                "flex flex-1 justify-center items-center gap-2 py-4 transition-colors",
                 showCodePanel ? "text-primary" : "text-muted-foreground"
               )}
             >
-              <Code2 className="w-5 h-5" />
+              <Code2 className="h-5 w-5" />
               <span className="text-sm font-medium">Code</span>
             </button>
           </div>
           
           {/* Desktop: Two Column Layout */}
-          <div className="hidden md:flex flex-1">
+          <div className="hidden flex-1 md:flex">
             {/* Left Panel - Transcript */}
             <div className={cn(
-              "border-r border-border bg-card transition-all duration-300",
+              "bg-card border-border border-r transition-all duration-300",
               showCodePanel ? "w-1/2" : "w-full"
             )}>
               <TranscriptPanel
@@ -155,7 +155,7 @@ const Interview = () => {
             
             {/* Right Panel - Code Editor */}
             {showCodePanel && (
-              <div className="w-1/2 animate-slide-in-right">
+              <div className="animate-slide-in-right w-1/2">
                 <CodeEditorPanel
                   problem={mockProblem}
                   onSubmit={handleCodeSubmit}
@@ -165,7 +165,7 @@ const Interview = () => {
           </div>
           
           {/* Mobile: Single Panel */}
-          <div className="md:hidden flex-1 pb-16">
+          <div className="flex-1 pb-16 md:hidden">
             {!showCodePanel ? (
               <TranscriptPanel
                 messages={messages}
