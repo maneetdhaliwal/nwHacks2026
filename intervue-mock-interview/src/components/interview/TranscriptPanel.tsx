@@ -30,9 +30,9 @@ const TranscriptPanel = ({
   return (
     <div className="flex flex-col h-full">
       {/* Header */}
-      <div className="flex items-center justify-between px-6 py-4 border-b border-border">
+      <div className="flex justify-between items-center px-6 py-4 border-border border-b">
         <div>
-          <h2 className="text-lg font-semibold text-foreground">Interview Session</h2>
+          <h2 className="font-semibold text-foreground text-lg">Interview Session</h2>
           <StatusIndicator status={status} className="mt-1" />
         </div>
       </div>
@@ -40,15 +40,15 @@ const TranscriptPanel = ({
       {/* Messages */}
       <div 
         ref={scrollRef}
-        className="flex-1 overflow-y-auto p-6 space-y-4"
+        className="flex-1 space-y-4 p-6 overflow-y-auto"
       >
         {messages.length === 0 ? (
-          <div className="flex flex-col items-center justify-center h-full text-center">
-            <div className="w-16 h-16 rounded-2xl gradient-primary flex items-center justify-center mb-4 glow-primary animate-float">
+          <div className="flex flex-col justify-center items-center h-full text-center">
+            <div className="flex justify-center items-center mb-4 rounded-2xl w-16 h-16 animate-float gradient-primary glow-primary">
               <Mic className="w-8 h-8 text-primary-foreground" />
             </div>
-            <h3 className="text-lg font-medium text-foreground mb-2">Ready to begin</h3>
-            <p className="text-muted-foreground text-sm max-w-xs">
+            <h3 className="mb-2 font-medium text-foreground text-lg">Ready to begin</h3>
+            <p className="max-w-xs text-muted-foreground text-sm">
               Click Start to begin your mock technical interview with our AI interviewer.
             </p>
           </div>
@@ -60,7 +60,7 @@ const TranscriptPanel = ({
       </div>
       
       {/* Controls */}
-      <div className="px-6 py-4 border-t border-border flex items-center justify-center gap-4">
+      <div className="flex justify-center items-center gap-4 px-6 py-4 border-border border-t">
         <Button
           onClick={onToggleRecording}
           size="lg"
@@ -72,28 +72,26 @@ const TranscriptPanel = ({
         >
           {isRecording ? (
             <>
-              <MicOff className="w-5 h-5 mr-2" />
+              <MicOff className="mr-2 w-5 h-5" />
               Stop
             </>
           ) : (
             <>
-              <Mic className="w-5 h-5 mr-2" />
+              <Mic className="mr-2 w-5 h-5" />
               Start
             </>
           )}
         </Button>
         
-        {isRecording && (
-          <Button
-            onClick={onEndInterview}
-            variant="outline"
-            size="lg"
-            className="border-destructive/50 text-destructive hover:bg-destructive/10"
-          >
-            <PhoneOff className="w-5 h-5 mr-2" />
-            End Interview
-          </Button>
-        )}
+        <Button
+          onClick={onEndInterview}
+          variant="outline"
+          size="lg"
+          className="hover:bg-destructive/10 border-destructive/50 text-destructive"
+        >
+          <PhoneOff className="mr-2 w-5 h-5" />
+          End Interview
+        </Button>
       </div>
     </div>
   );

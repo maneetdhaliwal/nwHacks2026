@@ -79,32 +79,32 @@ const Results = () => {
   };
   
   return (
-    <div className="min-h-screen bg-background">
+    <div className="bg-background min-h-screen">
       <Header />
       
-      <main className="pt-24 pb-12 px-6">
-        <div className="container mx-auto max-w-4xl">
+      <main className="px-6 pt-24 pb-12">
+        <div className="mx-auto max-w-4xl container">
           {/* Header */}
-          <div className="text-center mb-12">
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass mb-6">
+          <div className="mb-12 text-center">
+            <div className="inline-flex items-center gap-2 mb-6 px-4 py-2 rounded-full glass">
               <CheckCircle2 className="w-4 h-4 text-success" />
-              <span className="text-sm text-muted-foreground">Interview Complete</span>
+              <span className="text-muted-foreground text-sm">Interview Complete</span>
             </div>
             
-            <h1 className="text-4xl md:text-5xl font-bold mb-4">
+            <h1 className="mb-4 font-bold text-4xl md:text-5xl">
               Your Interview Results
             </h1>
-            <p className="text-lg text-muted-foreground">
+            <p className="text-muted-foreground text-lg">
               Here's a detailed breakdown of your performance
             </p>
           </div>
           
           {/* Overall Score Card */}
-          <div className="rounded-2xl gradient-card border border-border p-8 mb-8 relative overflow-hidden">
+          <div className="relative mb-8 p-8 border border-border rounded-2xl overflow-hidden gradient-card">
             <div className="absolute inset-0 opacity-20" style={{ background: 'var(--gradient-glow)' }} />
-            <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-8">
-              <div className="text-center md:text-left">
-                <h2 className="text-xl font-semibold mb-2">Overall Performance</h2>
+            <div className="z-10 relative flex md:flex-row flex-col justify-between items-center gap-8">
+              <div className="md:text-left text-center">
+                <h2 className="mb-2 font-semibold text-xl">Overall Performance</h2>
                 <p className="text-muted-foreground">
                   {getScoreLabel(overallScore)} performance! Keep practicing to improve further.
                 </p>
@@ -112,7 +112,7 @@ const Results = () => {
               
               <div className="flex flex-col items-center">
                 <div className="relative w-32 h-32">
-                  <svg className="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
+                  <svg className="w-full h-full -rotate-90 transform" viewBox="0 0 100 100">
                     <circle
                       cx="50"
                       cy="50"
@@ -133,42 +133,42 @@ const Results = () => {
                       className="transition-all duration-1000"
                     />
                   </svg>
-                  <div className="absolute inset-0 flex flex-col items-center justify-center">
-                    <span className={cn("text-4xl font-bold", getScoreColor(overallScore))}>
+                  <div className="absolute inset-0 flex flex-col justify-center items-center">
+                    <span className={cn("font-bold text-4xl", getScoreColor(overallScore))}>
                       {overallScore}
                     </span>
-                    <span className="text-sm text-muted-foreground">/100</span>
+                    <span className="text-muted-foreground text-sm">/100</span>
                   </div>
                 </div>
               </div>
             </div>
             
             {/* Stats */}
-            <div className="relative z-10 grid grid-cols-2 md:grid-cols-3 gap-4 mt-8 pt-8 border-t border-border/50">
+            <div className="z-10 relative gap-4 grid grid-cols-2 md:grid-cols-3 mt-8 pt-8 border-border/50 border-t">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                <div className="flex justify-center items-center bg-primary/10 rounded-lg w-10 h-10">
                   <Clock className="w-5 h-5 text-primary" />
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">Duration</p>
+                  <p className="text-muted-foreground text-sm">Duration</p>
                   <p className="font-semibold">{duration}</p>
                 </div>
               </div>
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                <div className="flex justify-center items-center bg-primary/10 rounded-lg w-10 h-10">
                   <MessageSquare className="w-5 h-5 text-primary" />
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">Questions</p>
+                  <p className="text-muted-foreground text-sm">Questions</p>
                   <p className="font-semibold">{questionsAnswered} answered</p>
                 </div>
               </div>
               <div className="flex items-center gap-3 col-span-2 md:col-span-1">
-                <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                <div className="flex justify-center items-center bg-primary/10 rounded-lg w-10 h-10">
                   <TrendingUp className="w-5 h-5 text-primary" />
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">Trend</p>
+                  <p className="text-muted-foreground text-sm">Trend</p>
                   <p className="font-semibold text-success">+12% improvement</p>
                 </div>
               </div>
@@ -180,37 +180,37 @@ const Results = () => {
             {feedbackSections.map((section, index) => (
               <div 
                 key={index}
-                className="rounded-2xl border border-border bg-card/50 p-6 animate-fade-in"
+                className="bg-card/50 p-6 border border-border rounded-2xl animate-fade-in"
                 style={{ animationDelay: `${index * 100}ms` }}
               >
-                <div className="flex items-start justify-between mb-4">
+                <div className="flex justify-between items-start mb-4">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-lg gradient-primary flex items-center justify-center">
+                    <div className="flex justify-center items-center rounded-lg w-10 h-10 gradient-primary">
                       <section.icon className="w-5 h-5 text-primary-foreground" />
                     </div>
                     <div>
-                      <h3 className="text-lg font-semibold">{section.title}</h3>
-                      <p className="text-sm text-muted-foreground">
+                      <h3 className="font-semibold text-lg">{section.title}</h3>
+                      <p className="text-muted-foreground text-sm">
                         Score: <span className={cn("font-medium", getScoreColor(section.score))}>{section.score}/100</span>
                       </p>
                     </div>
                   </div>
                 </div>
                 
-                <p className="text-muted-foreground mb-6 leading-relaxed">
+                <p className="mb-6 text-muted-foreground leading-relaxed">
                   {section.feedback}
                 </p>
                 
-                <div className="grid md:grid-cols-2 gap-6">
+                <div className="gap-6 grid md:grid-cols-2">
                   <div>
-                    <h4 className="text-sm font-medium text-success flex items-center gap-2 mb-3">
+                    <h4 className="flex items-center gap-2 mb-3 font-medium text-success text-sm">
                       <CheckCircle2 className="w-4 h-4" />
                       What you did well
                     </h4>
                     <ul className="space-y-2">
                       {section.highlights.map((item, i) => (
-                        <li key={i} className="text-sm text-muted-foreground flex items-start gap-2">
-                          <span className="w-1.5 h-1.5 rounded-full bg-success mt-1.5 flex-shrink-0" />
+                        <li key={i} className="flex items-start gap-2 text-muted-foreground text-sm">
+                          <span className="flex-shrink-0 bg-success mt-1.5 rounded-full w-1.5 h-1.5" />
                           {item}
                         </li>
                       ))}
@@ -218,14 +218,14 @@ const Results = () => {
                   </div>
                   
                   <div>
-                    <h4 className="text-sm font-medium text-warning flex items-center gap-2 mb-3">
+                    <h4 className="flex items-center gap-2 mb-3 font-medium text-warning text-sm">
                       <TrendingUp className="w-4 h-4" />
                       Areas to improve
                     </h4>
                     <ul className="space-y-2">
                       {section.improvements.map((item, i) => (
-                        <li key={i} className="text-sm text-muted-foreground flex items-start gap-2">
-                          <span className="w-1.5 h-1.5 rounded-full bg-warning mt-1.5 flex-shrink-0" />
+                        <li key={i} className="flex items-start gap-2 text-muted-foreground text-sm">
+                          <span className="flex-shrink-0 bg-warning mt-1.5 rounded-full w-1.5 h-1.5" />
                           {item}
                         </li>
                       ))}
@@ -237,13 +237,13 @@ const Results = () => {
           </div>
           
           {/* Actions */}
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+          <div className="flex sm:flex-row flex-col justify-center items-center gap-4">
             <Button
               onClick={() => navigate("/interview")}
               size="lg"
-              className="gradient-primary text-primary-foreground glow-primary hover:opacity-90 w-full sm:w-auto"
+              className="hover:opacity-90 w-full sm:w-auto text-primary-foreground gradient-primary glow-primary"
             >
-              <RotateCcw className="w-5 h-5 mr-2" />
+              <RotateCcw className="mr-2 w-5 h-5" />
               Start New Interview
             </Button>
             <Button
@@ -251,7 +251,7 @@ const Results = () => {
               size="lg"
               className="w-full sm:w-auto"
             >
-              <Download className="w-5 h-5 mr-2" />
+              <Download className="mr-2 w-5 h-5" />
               Download Report
             </Button>
             <Button
@@ -259,7 +259,7 @@ const Results = () => {
               size="lg"
               className="w-full sm:w-auto"
             >
-              <Share2 className="w-5 h-5 mr-2" />
+              <Share2 className="mr-2 w-5 h-5" />
               Share Results
             </Button>
           </div>

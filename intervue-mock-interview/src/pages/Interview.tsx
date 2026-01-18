@@ -265,20 +265,24 @@ const Interview = () => {
     if ('speechSynthesis' in window) {
       window.speechSynthesis.cancel();
     }
-    // Navigate to results with mock data
-    navigate("/results", { 
-      state: { 
-        messages,
-        duration: "12:34",
-        questionsAnswered: 3,
-      }
-    });
+    // Navigate back to problem selector
+    navigate("/");
   };
   
   const handleCodeSubmit = (code: string) => {
-    // Add user code submission as a message
-    addMessage('user', `I've submitted my solution:\n\n${code}`);
-    // The AI will respond via the pendingAICall useEffect
+    // Stop any ongoing speech
+    if ('speechSynthesis' in window) {
+      window.speechSynthesis.cancel();
+    }
+    // Navigate to results with interview data
+    navigate("/results", {
+      state: {
+        messages,
+        duration: "12:34",
+        questionsAnswered: 3,
+        submittedCode: code,
+      }
+    });
   };
 
   // Show problem selector if interview hasn't started
