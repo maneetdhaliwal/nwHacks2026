@@ -6,7 +6,7 @@ import CodeEditorPanel from "@/components/interview/CodeEditorPanel";
 import ProblemSelector from "@/components/interview/ProblemSelector";
 import { Message } from "@/components/interview/ChatBubble";
 import { InterviewStatus } from "@/components/interview/StatusIndicator";
-import { CodingProblem } from "@/data/codingProblems";
+import { CodingProblem, BehavioralQuestion, isCodingProblem } from "@/data/codingProblems";
 import { Code2, MessageSquare } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -95,7 +95,7 @@ interface SpeechSynthesisVoice {
 
 const Interview = () => {
   const navigate = useNavigate();
-  const [selectedProblem, setSelectedProblem] = useState<CodingProblem | null>(null);
+  const [selectedProblem, setSelectedProblem] = useState<CodingProblem | BehavioralQuestion | null>(null);
   const [interviewStarted, setInterviewStarted] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [status, setStatus] = useState<InterviewStatus>("idle");
@@ -164,26 +164,46 @@ const Interview = () => {
         return;
       }
 
-      const systemMessage = {
-        role: 'system',
-        content: `You are conducting a coding interview for the following problem:
+      let systemMessage;
+      
+      if (isCodingProblem(selectedProblem)) {
+        const codingProblem = selectedProblem as CodingProblem;
+        systemMessage = {
+          role: 'system',
+          content: `You are conducting a coding interview for the following problem:
 
-Title: ${selectedProblem.title}
+Title: ${codingProblem.title}
 
-Difficulty: ${selectedProblem.difficulty}
+Difficulty: ${codingProblem.difficulty}
 
-Description: ${selectedProblem.description}
+Description: ${codingProblem.description}
 
 Examples:
-${selectedProblem.examples.map(ex => `- ${ex}`).join('\n')}
+${codingProblem.examples.map(ex => `- ${ex}`).join('\n')}
 
 Test Cases:
-${selectedProblem.testCases.map(tc => `- Input: ${JSON.stringify(tc.input)}, Expected: ${JSON.stringify(tc.expected)}, Description: ${tc.description}`).join('\n')}
+${codingProblem.testCases.map(tc => `- Input: ${JSON.stringify(tc.input)}, Expected: ${JSON.stringify(tc.expected)}, Description: ${tc.description}`).join('\n')}
 
 IMPORTANT: All code examples, hints, solutions, and discussions must be in JavaScript only. Do not mention or suggest solutions in any other programming language (Python, Java, etc.). When providing code snippets or algorithmic hints, always use JavaScript syntax and concepts.
 
 Please act as a professional coding interviewer. Ask relevant questions about the candidate's approach, provide feedback on their JavaScript code, and guide them through solving this problem using JavaScript. Maintain a conversational tone and be encouraging.`
-      };
+        };
+      } else {
+        const behavioralQuestion = selectedProblem as BehavioralQuestion;
+        systemMessage = {
+          role: 'system',
+          content: `You are conducting a behavioral interview. The question being asked is:
+
+Question: ${behavioralQuestion.title}
+
+Description: ${behavioralQuestion.description}
+
+Key Points to Look For in the Candidate's Answer:
+${behavioralQuestion.suggestedAnswerPoints.map(point => `- ${point}`).join('\n')}
+
+Please act as a professional behavioral interviewer. Ask follow-up questions to help the candidate elaborate on their answer. Listen for the key points above and provide constructive feedback. Be encouraging and help them develop their answer further if needed. Focus on understanding their approach, decision-making, and what they learned from the experience.`
+        };
+      }
 
       const apiMessages = [
         systemMessage,
@@ -252,7 +272,7 @@ Please act as a professional coding interviewer. Ask relevant questions about th
     }
   }, [pendingAICall, messages, callAI]);
   
-  const handleSelectProblem = (problem: CodingProblem) => {
+  const handleSelectProblem = (problem: CodingProblem | BehavioralQuestion) => {
     setSelectedProblem(problem);
   };
 
@@ -260,7 +280,9 @@ Please act as a professional coding interviewer. Ask relevant questions about th
     if (selectedProblem) {
       setInterviewStarted(true);
       setStartTime(new Date());
-      setShowCodePanel(true); // Show code panel immediately so user can see the problem
+      if (isCodingProblem(selectedProblem)) {
+        setShowCodePanel(true); // Show code panel immediately so user can see the problem
+      }
       // Add initial AI message
       const initialMessage = selectedProblem.aiConversation[0].content;
       addMessage('ai', initialMessage);
@@ -362,16 +384,18 @@ Please act as a professional coding interviewer. Ask relevant questions about th
               <MessageSquare className="w-5 h-5" />
               <span className="font-medium text-sm">Chat</span>
             </button>
-            <button
-              onClick={() => setShowCodePanel(true)}
-              className={cn(
-                "flex flex-1 justify-center items-center gap-2 py-4 transition-colors",
-                showCodePanel ? "text-primary" : "text-muted-foreground"
-              )}
-            >
-              <Code2 className="w-5 h-5" />
-              <span className="font-medium text-sm">Code</span>
-            </button>
+            {selectedProblem && isCodingProblem(selectedProblem) && (
+              <button
+                onClick={() => setShowCodePanel(true)}
+                className={cn(
+                  "flex flex-1 justify-center items-center gap-2 py-4 transition-colors",
+                  showCodePanel ? "text-primary" : "text-muted-foreground"
+                )}
+              >
+                <Code2 className="w-5 h-5" />
+                <span className="font-medium text-sm">Code</span>
+              </button>
+            )}
           </div>
           
           {/* Desktop: Two Column Layout */}
@@ -391,10 +415,10 @@ Please act as a professional coding interviewer. Ask relevant questions about th
             </div>
             
             {/* Right Panel - Code Editor */}
-            {showCodePanel && selectedProblem && (
+            {showCodePanel && selectedProblem && isCodingProblem(selectedProblem) && (
               <div className="w-1/2 animate-slide-in-right">
                 <CodeEditorPanel
-                  problem={selectedProblem}
+                  problem={selectedProblem as CodingProblem}
                   onSubmit={handleCodeSubmit}
                 />
               </div>

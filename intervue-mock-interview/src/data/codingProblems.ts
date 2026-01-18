@@ -12,7 +12,26 @@ export interface CodingProblem {
   aiConversation: { role: "ai" | "user"; content: string }[];
 }
 
-export const codingProblems: CodingProblem[] = [
+export interface BehavioralQuestion {
+  id: string;
+  title: string;
+  category: "Behavioral" | "System Design" | "Communication";
+  description: string;
+  suggestedAnswerPoints: string[];
+  aiConversation: { role: "ai" | "user"; content: string }[];
+}
+
+export type InterviewChallenge = CodingProblem | BehavioralQuestion;
+
+export const isBehavioralQuestion = (item: InterviewChallenge): item is BehavioralQuestion => {
+  return 'suggestedAnswerPoints' in item;
+};
+
+export const isCodingProblem = (item: InterviewChallenge): item is CodingProblem => {
+  return 'testCases' in item;
+};
+
+export const allChallenges: InterviewChallenge[] = [
   {
     id: "two-sum",
     title: "Two Sum",
@@ -186,7 +205,99 @@ export const codingProblems: CodingProblem[] = [
       { role: "ai", content: "Excellent! That's the merge operation from merge sort - O(n+m) time complexity. Don't forget to handle when one array is exhausted. Implement it!" },
     ],
   },
+  {
+    id: "tell-me-about-yourself",
+    title: "Tell Me About Yourself",
+    category: "Behavioral",
+    description: "Give a brief overview of your background, experience, and what interests you about this role.",
+    suggestedAnswerPoints: [
+      "Mention your background and relevant experience",
+      "Highlight key accomplishments and skills",
+      "Explain your career progression",
+      "Show enthusiasm for the role and company",
+      "Keep it concise (2-3 minutes)"
+    ],
+    aiConversation: [
+      { role: "ai", content: "Let's start with an open-ended question. Tell me about yourself." },
+      { role: "user", content: "I have 5 years of experience as a software engineer, specializing in full-stack development with React and Node.js. I've worked on scaling systems that handle millions of users." },
+      { role: "ai", content: "That's a good start. Can you tell me about a specific project where you made a significant impact?" },
+    ],
+  },
+  {
+    id: "biggest-challenge",
+    title: "Describe Your Biggest Challenge",
+    category: "Behavioral",
+    description: "Tell us about a significant challenge you faced at work and how you overcame it.",
+    suggestedAnswerPoints: [
+      "Choose a real, relevant challenge",
+      "Explain the context and why it was difficult",
+      "Describe your approach to solving it",
+      "Highlight the outcome and what you learned",
+      "Be honest but professional"
+    ],
+    aiConversation: [
+      { role: "ai", content: "Tell me about a significant technical challenge you faced and how you overcame it." },
+      { role: "user", content: "At my previous company, we had a critical performance issue where our database queries were taking too long. I analyzed the queries, identified missing indexes, and implemented query optimization." },
+      { role: "ai", content: "Great example! What was the result of those optimizations?" },
+    ],
+  },
+  {
+    id: "teamwork-example",
+    title: "Give a Teamwork Example",
+    category: "Behavioral",
+    description: "Describe a time when you worked effectively with others to achieve a goal.",
+    suggestedAnswerPoints: [
+      "Choose an example showing collaboration",
+      "Show how you listened and respected others' opinions",
+      "Describe conflict resolution if applicable",
+      "Highlight the team's collective success",
+      "Mention what you learned from working with them"
+    ],
+    aiConversation: [
+      { role: "ai", content: "Can you give me an example of a time when you had to work closely with a team member who had a different approach than you?" },
+      { role: "user", content: "Yes, I worked with a designer who wanted to use a different technology stack. Instead of arguing, I listened to their concerns and we found a solution that combined both approaches." },
+      { role: "ai", content: "That's excellent. How did that impact the project?" },
+    ],
+  },
+  {
+    id: "handle-failure",
+    title: "How Do You Handle Failure",
+    category: "Behavioral",
+    description: "Tell us about a time you failed and what you learned from it.",
+    suggestedAnswerPoints: [
+      "Be honest about the failure",
+      "Avoid blaming others",
+      "Explain what went wrong from your perspective",
+      "Describe the steps you took to recover",
+      "Emphasize the lessons learned and growth"
+    ],
+    aiConversation: [
+      { role: "ai", content: "Tell me about a time when you failed on a project or task." },
+      { role: "user", content: "I once shipped a feature without proper testing and it caused a production bug. I took responsibility, fixed it immediately, and implemented better testing practices." },
+      { role: "ai", content: "How did that experience change your approach to development?" },
+    ],
+  },
+  {
+    id: "why-this-company",
+    title: "Why This Company?",
+    category: "Behavioral",
+    description: "Explain why you're interested in this specific company and role.",
+    suggestedAnswerPoints: [
+      "Show genuine interest in the company's mission",
+      "Research the company's products and values",
+      "Explain how your skills align with their needs",
+      "Mention specific projects or initiatives that excite you",
+      "Show enthusiasm for growth opportunities"
+    ],
+    aiConversation: [
+      { role: "ai", content: "Why are you interested in working at our company?" },
+      { role: "user", content: "I'm impressed by your commitment to open source and your innovative approach to problem-solving. Your recent project aligned perfectly with my interests in distributed systems." },
+      { role: "ai", content: "That's great to hear. How do you see yourself contributing to our team?" },
+    ],
+  },
 ];
+
+export const codingProblems: CodingProblem[] = allChallenges.filter(isCodingProblem);
 
 export const getDifficultyColor = (difficulty: CodingProblem["difficulty"]) => {
   switch (difficulty) {
