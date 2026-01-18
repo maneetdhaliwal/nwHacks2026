@@ -62,9 +62,6 @@ const Index = () => {
                 <ArrowRight className="w-5 h-5 ml-2" />
               </Button>
             </Link>
-            <Button size="lg" variant="outline" className="text-base px-8 py-6">
-              Watch Demo
-            </Button>
           </div>
           
           {/* Hero Visual */}
