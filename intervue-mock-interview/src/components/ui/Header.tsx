@@ -9,7 +9,7 @@ const Header = () => {
           <div className="w-9 h-9 rounded-lg gradient-primary flex items-center justify-center glow-primary transition-all group-hover:scale-105">
             <Bot className="w-5 h-5 text-primary-foreground" />
           </div>
-          <span className="text-xl font-semibold text-foreground">Intervue</span>
+          <span className="text-xl font-semibold text-foreground">Mockr</span>
         </Link>
         
         <nav className="flex items-center gap-6">
