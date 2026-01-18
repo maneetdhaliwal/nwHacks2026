@@ -1,13 +1,12 @@
 import { Link } from "react-router-dom";
-import { Bot } from "lucide-react";
 
 const Header = () => {
   return (
     <header className="fixed top-0 left-0 right-0 z-50 glass">
       <div className="container mx-auto px-6 h-16 flex items-center justify-between">
         <Link to="/" className="flex items-center gap-2 group">
-          <div className="w-9 h-9 rounded-lg gradient-primary flex items-center justify-center glow-primary transition-all group-hover:scale-105">
-            <Bot className="w-5 h-5 text-primary-foreground" />
+          <div className="w-9 h-9 rounded-lg transition-all group-hover:scale-105">
+            <img src="/mockr_logo.png" alt="Mockr Logo" className="w-full h-full" />
           </div>
           <span className="text-xl font-semibold text-foreground">Mockr</span>
         </Link>
