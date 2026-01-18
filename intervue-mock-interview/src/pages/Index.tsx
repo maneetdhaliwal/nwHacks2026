@@ -77,7 +77,7 @@ const Index = () => {
                   <div className="w-3 h-3 rounded-full bg-warning/60" />
                   <div className="w-3 h-3 rounded-full bg-success/60" />
                 </div>
-                <span className="text-xs text-muted-foreground ml-2">Intervue — Mock Interview Session</span>
+                <span className="text-xs text-muted-foreground ml-2">Mockr — Mock Interview Session</span>
               </div>
               <div className="grid md:grid-cols-2 divide-x divide-border">
                 <div className="p-6 space-y-4">
@@ -176,10 +176,10 @@ const Index = () => {
             <div className="w-8 h-8 rounded-lg gradient-primary flex items-center justify-center">
               <Bot className="w-4 h-4 text-primary-foreground" />
             </div>
-            <span className="font-semibold">Intervue</span>
+            <span className="font-semibold">Mockr</span>
           </div>
           <p className="text-sm text-muted-foreground">
-            © 2024 Intervue. Practice makes perfect.
+            © 2026 Mockr. Practice makes perfect.
           </p>
         </div>
       </footer>
