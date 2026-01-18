@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Header from "@/components/ui/Header";
 import TranscriptPanel from "@/components/interview/TranscriptPanel";
@@ -10,6 +10,89 @@ import { CodingProblem } from "@/data/codingProblems";
 import { Code2, MessageSquare } from "lucide-react";
 import { cn } from "@/lib/utils";
 
+// Type declarations for Speech Recognition
+declare global {
+  interface Window {
+    SpeechRecognition: typeof SpeechRecognition;
+    webkitSpeechRecognition: typeof SpeechRecognition;
+    speechSynthesis: SpeechSynthesis;
+  }
+}
+
+interface SpeechRecognition extends EventTarget {
+  continuous: boolean;
+  interimResults: boolean;
+  lang: string;
+  start(): void;
+  stop(): void;
+  onresult: ((this: SpeechRecognition, ev: SpeechRecognitionEvent) => void) | null;
+  onend: ((this: SpeechRecognition, ev: Event) => void) | null;
+  onerror: ((this: SpeechRecognition, ev: SpeechRecognitionErrorEvent) => void) | null;
+}
+
+interface SpeechRecognitionEvent extends Event {
+  results: SpeechRecognitionResultList;
+}
+
+interface SpeechRecognitionErrorEvent extends Event {
+  error: string;
+}
+
+interface SpeechRecognitionResultList {
+  readonly length: number;
+  item(index: number): SpeechRecognitionResult;
+  [index: number]: SpeechRecognitionResult;
+}
+
+interface SpeechRecognitionResult {
+  readonly length: number;
+  item(index: number): SpeechRecognitionAlternative;
+  [index: number]: SpeechRecognitionAlternative;
+  isFinal: boolean;
+}
+
+interface SpeechRecognitionAlternative {
+  transcript: string;
+  confidence: number;
+}
+
+declare const SpeechRecognition: {
+  prototype: SpeechRecognition;
+  new(): SpeechRecognition;
+};
+
+// Text-to-Speech types
+interface SpeechSynthesis extends EventTarget {
+  speak(utterance: SpeechSynthesisUtterance): void;
+  cancel(): void;
+  pause(): void;
+  resume(): void;
+  getVoices(): SpeechSynthesisVoice[];
+  speaking: boolean;
+  paused: boolean;
+  pending: boolean;
+}
+
+interface SpeechSynthesisUtterance extends EventTarget {
+  text: string;
+  lang: string;
+  voice: SpeechSynthesisVoice | null;
+  volume: number;
+  rate: number;
+  pitch: number;
+  onstart: ((this: SpeechSynthesisUtterance, ev: Event) => void) | null;
+  onend: ((this: SpeechSynthesisUtterance, ev: Event) => void) | null;
+  onerror: ((this: SpeechSynthesisUtterance, ev: Event) => void) | null;
+}
+
+interface SpeechSynthesisVoice {
+  voiceURI: string;
+  name: string;
+  lang: string;
+  localService: boolean;
+  default: boolean;
+}
+
 const Interview = () => {
   const navigate = useNavigate();
   const [selectedProblem, setSelectedProblem] = useState<CodingProblem | null>(null);
@@ -18,7 +101,9 @@ const Interview = () => {
   const [status, setStatus] = useState<InterviewStatus>("idle");
   const [isRecording, setIsRecording] = useState(false);
   const [showCodePanel, setShowCodePanel] = useState(false);
-  const [messageIndex, setMessageIndex] = useState(0);
+  const [isListening, setIsListening] = useState(false);
+  const [pendingAICall, setPendingAICall] = useState(false);
+  const recognitionRef = useRef<SpeechRecognition | null>(null);
   
   const addMessage = useCallback((role: "ai" | "user", content: string) => {
     const newMessage: Message = {
@@ -30,41 +115,114 @@ const Interview = () => {
     setMessages(prev => [...prev, newMessage]);
   }, []);
   
-  const simulateConversation = useCallback(() => {
-    if (!selectedProblem) return;
-    
-    const conversation = selectedProblem.aiConversation;
-    
-    if (messageIndex >= conversation.length) {
-      // Show code panel after conversation
+  const speakMessage = useCallback((text: string) => {
+    if ('speechSynthesis' in window) {
+      // Cancel any ongoing speech
+      window.speechSynthesis.cancel();
+      
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = 'en-US';
+      utterance.rate = 0.9;
+      utterance.pitch = 1;
+      utterance.volume = 0.8;
+      
+      utterance.onstart = () => {
+        setStatus('speaking');
+      };
+      
+      utterance.onend = () => {
+        setStatus('idle');
+      };
+      
+      utterance.onerror = (event) => {
+        console.error('Speech synthesis error:', event);
+        setStatus('idle');
+      };
+      
+      window.speechSynthesis.speak(utterance);
+    }
+  }, []);
+  
+  const callAI = useCallback(async (conversationMessages: Message[]) => {
+    setStatus('thinking');
+    try {
+      const apiKey = import.meta.env.VITE_OPENROUTER_API_KEY;
+      if (!apiKey) {
+        console.error('OpenRouter API key not found');
+        const errorMessage = 'Sorry, I cannot respond right now. API key is missing.';
+        addMessage('ai', errorMessage);
+        speakMessage(errorMessage);
+        return;
+      }
+
+      const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${apiKey}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          model: 'anthropic/claude-3-haiku',
+          messages: conversationMessages.map(m => ({ 
+            role: m.role === 'ai' ? 'assistant' : m.role, 
+            content: m.content 
+          })),
+        }),
+      });
+
+      const data = await response.json();
+      const aiResponse = data.choices[0].message.content;
+      addMessage('ai', aiResponse);
+      speakMessage(aiResponse);
+    } catch (error) {
+      console.error('Error calling AI:', error);
+      const errorMessage = 'Sorry, I encountered an error. Please try again.';
+      addMessage('ai', errorMessage);
+      speakMessage(errorMessage);
+    }
+  }, [addMessage, speakMessage]);
+
+  // Setup speech recognition
+  useEffect(() => {
+    if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      recognitionRef.current = new SpeechRecognition();
+      recognitionRef.current.continuous = true;
+      recognitionRef.current.interimResults = false;
+      recognitionRef.current.lang = 'en-US';
+
+      recognitionRef.current.onresult = (event) => {
+        const transcript = event.results[event.results.length - 1][0].transcript;
+        addMessage('user', transcript);
+        setPendingAICall(true);
+      };
+
+      recognitionRef.current.onend = () => {
+        setIsListening(false);
+      };
+
+      recognitionRef.current.onerror = (event) => {
+        console.error('Speech recognition error:', event.error);
+        setIsListening(false);
+        setStatus('idle');
+      };
+    }
+  }, [addMessage]);
+
+  // Handle AI calls when user speaks
+  useEffect(() => {
+    if (pendingAICall && messages.length > 0 && messages[messages.length - 1].role === 'user') {
+      callAI(messages);
+      setPendingAICall(false);
+    }
+  }, [pendingAICall, messages, callAI]);
+
+  // Show code panel after some conversation
+  useEffect(() => {
+    if (messages.length >= 4) {
       setShowCodePanel(true);
-      setStatus("idle");
-      return;
     }
-    
-    const msg = conversation[messageIndex];
-    
-    if (msg.role === "ai") {
-      setStatus("speaking");
-      setTimeout(() => {
-        addMessage("ai", msg.content);
-        setStatus("listening");
-        setMessageIndex(prev => prev + 1);
-        
-        // Continue with next message
-        setTimeout(() => simulateConversation(), 2000);
-      }, 1500);
-    } else {
-      setStatus("thinking");
-      setTimeout(() => {
-        addMessage("user", msg.content);
-        setMessageIndex(prev => prev + 1);
-        
-        // Continue with next message
-        setTimeout(() => simulateConversation(), 1000);
-      }, 1000);
-    }
-  }, [messageIndex, addMessage, selectedProblem]);
+  }, [messages.length]);
   
   const handleSelectProblem = (problem: CodingProblem) => {
     setSelectedProblem(problem);
@@ -73,26 +231,40 @@ const Interview = () => {
   const handleStartInterview = () => {
     if (selectedProblem) {
       setInterviewStarted(true);
+      // Add initial AI message
+      const initialMessage = selectedProblem.aiConversation[0].content;
+      addMessage('ai', initialMessage);
+      speakMessage(initialMessage);
     }
   };
   
   const handleToggleRecording = () => {
     if (!isRecording) {
+      // Stop any ongoing speech when starting recording
+      if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+      }
+      if (!recognitionRef.current) {
+        alert('Speech recognition is not supported in this browser.');
+        return;
+      }
       setIsRecording(true);
+      setIsListening(true);
       setStatus("listening");
-      setShowCodePanel(true); // Show code sandbox when recording starts
-      // Start simulated conversation
-      setTimeout(() => {
-        setStatus("speaking");
-        simulateConversation();
-      }, 500);
+      recognitionRef.current.start();
     } else {
       setIsRecording(false);
+      setIsListening(false);
       setStatus("idle");
+      recognitionRef.current?.stop();
     }
   };
   
   const handleEndInterview = () => {
+    // Stop any ongoing speech
+    if ('speechSynthesis' in window) {
+      window.speechSynthesis.cancel();
+    }
     // Navigate to results with mock data
     navigate("/results", { 
       state: { 
@@ -104,8 +276,9 @@ const Interview = () => {
   };
   
   const handleCodeSubmit = (code: string) => {
-    addMessage("ai", "Great solution! Your implementation correctly uses a hash map and handles the edge cases well. Let's move on to discuss the time and space complexity of your solution.");
-    setShowCodePanel(false);
+    // Add user code submission as a message
+    addMessage('user', `I've submitted my solution:\n\n${code}`);
+    // The AI will respond via the pendingAICall useEffect
   };
 
   // Show problem selector if interview hasn't started
