@@ -295,6 +295,132 @@ export const allChallenges: InterviewChallenge[] = [
       { role: "ai", content: "That's great to hear. How do you see yourself contributing to our team?" },
     ],
   },
+  {
+    id: "conflict-resolution",
+    title: "Conflict Resolution",
+    category: "Behavioral",
+    description: "Tell us about a conflict with a colleague and how you resolved it.",
+    suggestedAnswerPoints: [
+      "Describe the conflict objectively",
+      "Show your perspective without blaming",
+      "Explain steps taken to understand the other person",
+      "Highlight the resolution and compromise reached",
+      "Demonstrate growth and improved communication"
+    ],
+    aiConversation: [
+      { role: "ai", content: "Tell me about a time when you had a serious disagreement with a colleague. How did you handle it?" },
+      { role: "user", content: "We disagreed on the architecture approach for a feature. I scheduled a 1-on-1, listened to their concerns, and we did a design review together to evaluate both approaches." },
+      { role: "ai", content: "That's great conflict resolution. What was the outcome?" },
+    ],
+  },
+  {
+    id: "deadline-pressure",
+    title: "Managing Tight Deadlines",
+    category: "Behavioral",
+    description: "Describe a situation where you had to deliver under tight time constraints.",
+    suggestedAnswerPoints: [
+      "Acknowledge the pressure and stakes",
+      "Explain prioritization strategy used",
+      "Describe how you managed stress",
+      "Highlight effective communication with stakeholders",
+      "Explain the outcome and lessons learned"
+    ],
+    aiConversation: [
+      { role: "ai", content: "Tell me about a time when you had to meet a tight deadline. How did you handle it?" },
+      { role: "user", content: "A critical bug was blocking production. I triaged the issue, broke it into smaller chunks, and worked with QA in parallel to identify edge cases while I fixed the core issue." },
+      { role: "ai", content: "How did you communicate progress to stakeholders?" },
+    ],
+  },
+  {
+    id: "learning-from-mistakes",
+    title: "Learning from Code Review Feedback",
+    category: "Behavioral",
+    description: "Share an experience where you received critical feedback during a code review.",
+    suggestedAnswerPoints: [
+      "Be specific about the feedback received",
+      "Show openness to criticism",
+      "Explain how you improved based on feedback",
+      "Demonstrate long-term behavior change",
+      "Reflect on the growth opportunity"
+    ],
+    aiConversation: [
+      { role: "ai", content: "Tell me about a time you received critical feedback on your code. How did you respond?" },
+      { role: "user", content: "A senior engineer pointed out that my error handling was incomplete. Instead of being defensive, I asked questions to understand best practices and refactored the code." },
+      { role: "ai", content: "Did that change how you approach error handling going forward?" },
+    ],
+  },
+  {
+    id: "mentoring",
+    title: "Mentoring or Helping Others",
+    category: "Behavioral",
+    description: "Describe a time when you helped mentor or teach a colleague.",
+    suggestedAnswerPoints: [
+      "Choose a specific person and skill you taught",
+      "Explain your approach to teaching",
+      "Show patience and empathy",
+      "Highlight the impact and their growth",
+      "Demonstrate your own learning in the process"
+    ],
+    aiConversation: [
+      { role: "ai", content: "Tell me about a time when you mentored or helped develop someone on your team." },
+      { role: "user", content: "A junior developer was struggling with our codebase. I spent time pairing with them, explaining architectural decisions, and giving them progressively challenging tasks." },
+      { role: "ai", content: "How did that experience benefit you as well?" },
+    ],
+  },
+  {
+    id: "ambiguity",
+    title: "Handling Ambiguity",
+    category: "Behavioral",
+    description: "Describe how you approach a project with unclear requirements.",
+    suggestedAnswerPoints: [
+      "Show comfort with uncertainty",
+      "Explain how you gather requirements",
+      "Demonstrate initiative in asking questions",
+      "Highlight communication with stakeholders",
+      "Explain how you validated assumptions"
+    ],
+    aiConversation: [
+      { role: "ai", content: "Tell me about a project where requirements were unclear. How did you handle it?" },
+      { role: "user", content: "I took the initiative to set up stakeholder meetings, asked clarifying questions, and created a design document for feedback before starting development." },
+      { role: "ai", content: "How did this help prevent issues later?" },
+    ],
+  },
+  {
+    id: "creativity-innovation",
+    title: "Creativity and Innovation",
+    category: "Behavioral",
+    description: "Share an example of when you came up with a creative solution to a problem.",
+    suggestedAnswerPoints: [
+      "Describe the problem and constraints",
+      "Explain your creative thinking process",
+      "Show how you proposed the idea",
+      "Highlight the impact and results",
+      "Demonstrate willingness to take risks"
+    ],
+    aiConversation: [
+      { role: "ai", content: "Tell me about a time when you came up with a creative or unconventional solution to a technical problem." },
+      { role: "user", content: "We had performance issues with our real-time dashboard. Instead of just optimizing queries, I implemented a caching strategy with predictive loading that reduced load by 70%." },
+      { role: "ai", content: "How did you validate that your approach was the right one?" },
+    ],
+  },
+  {
+    id: "continuous-learning",
+    title: "Continuous Learning",
+    category: "Behavioral",
+    description: "Tell us about your approach to learning and staying current with technology.",
+    suggestedAnswerPoints: [
+      "Mention specific technologies or skills you've learned",
+      "Show proactive approach to professional development",
+      "Share resources you use (books, courses, communities)",
+      "Explain how you apply new knowledge to work",
+      "Demonstrate curiosity and growth mindset"
+    ],
+    aiConversation: [
+      { role: "ai", content: "How do you stay current with new technologies and best practices?" },
+      { role: "user", content: "I contribute to open source projects, read technical blogs weekly, and take online courses on topics relevant to our stack. Recently I learned WebAssembly to optimize a performance-critical component." },
+      { role: "ai", content: "How do you decide which technologies are worth learning?" },
+    ],
+  },
 ];
 
 export const codingProblems: CodingProblem[] = allChallenges.filter(isCodingProblem);

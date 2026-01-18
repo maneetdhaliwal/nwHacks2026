@@ -30,42 +30,39 @@ const ProblemSelector = ({
   return (
     <div className="flex flex-col h-full">
       {/* Header */}
-      <div className="px-6 py-8 border-border border-b text-center">
-        <div className="inline-flex items-center gap-2 mb-4 px-4 py-2 rounded-full glass">
+      <div className="px-6 py-4 border-border border-b text-center">
+        <div className="inline-flex items-center gap-2 mb-2 px-4 py-2 rounded-full glass">
           <Code2 className="w-4 h-4 text-primary" />
-          <span className="text-muted-foreground text-sm">Select a Problem</span>
+          <span className="text-muted-foreground text-xs">Select a Problem</span>
         </div>
-        <h1 className="mb-2 font-bold text-foreground text-2xl md:text-3xl">
+        <h1 className="mb-4 font-bold text-foreground text-xl md:text-2xl">
           Choose Your Challenge
         </h1>
-        <p className="mx-auto max-w-md text-muted-foreground mb-6">
-          Select a {problemType === "coding" ? "coding" : "behavioral"} problem to practice. The AI interviewer will guide you through solving it.
-        </p>
         
         {/* Problem Type Selector */}
-        <div className="flex justify-center gap-3">
+        <div className="flex justify-center gap-2">
           <button
             onClick={() => setProblemType("coding")}
             className={cn(
-              "px-4 py-2 rounded-lg font-medium transition-all duration-200 flex items-center gap-2",
+              "px-3 py-1.5 rounded-lg font-medium transition-all duration-200 flex items-center gap-1.5 text-sm",
               problemType === "coding"
                 ? "bg-primary text-primary-foreground shadow-lg"
                 : "bg-card border border-border text-muted-foreground hover:border-primary/50"
             )}
           >
-            <Code2 className="w-4 h-4" />
+            <Code2 className="w-3.5 h-3.5" />
             Coding Challenges
           </button>
           <button
             onClick={() => setProblemType("behavioral")}
             className={cn(
-              "px-4 py-2 rounded-lg font-medium transition-all duration-200 flex items-center gap-2",
+              "px-3 py-1.5 rounded-lg font-medium transition-all duration-200 flex items-center gap-1.5 text-sm",
               problemType === "behavioral"
                 ? "bg-primary text-primary-foreground shadow-lg"
                 : "bg-card border border-border text-muted-foreground hover:border-primary/50"
             )}
           >
-            <MessageCircle className="w-4 h-4" />
+            <MessageCircle className="w-3.5 h-3.5" />
             Behavioral Questions
           </button>
         </div>
@@ -130,7 +127,7 @@ const ProblemSelector = ({
       </div>
 
       {/* Start Button */}
-      <div className="bg-card/50 p-6 border-border border-t">
+      <div className="bg-card/50 p-4 border-border border-t">
         <div className="mx-auto max-w-3xl">
           <Button
             onClick={onStartInterview}
@@ -138,14 +135,14 @@ const ProblemSelector = ({
             size="lg"
             className={cn(
               "w-full text-primary-foreground gradient-primary glow-primary",
-              "hover:opacity-90 transition-opacity py-6 text-base",
+              "hover:opacity-90 transition-opacity py-4 text-sm md:text-base",
               !selectedProblem && "opacity-50 cursor-not-allowed"
             )}
           >
             {selectedProblem ? (
               <>
                 Start Interview: {selectedProblem.title}
-                <ArrowRight className="ml-2 w-5 h-5" />
+                <ArrowRight className="ml-2 w-4 h-4" />
               </>
             ) : (
               "Select a Problem to Start"
