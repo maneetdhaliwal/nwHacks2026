@@ -1,6 +1,6 @@
 import { allChallenges, CodingProblem, BehavioralQuestion, getDifficultyColor, isCodingProblem } from "@/data/codingProblems";
 import { cn } from "@/lib/utils";
-import { Code2, CheckCircle2, ArrowRight, MessageCircle } from "lucide-react";
+import { Code2, CheckCircle2, ArrowRight, MessageCircle, Shuffle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useState } from "react";
@@ -27,6 +27,14 @@ const ProblemSelector = ({
       return !isCodingProblem(challenge);
     }
   });
+
+  const handleRandomSelection = () => {
+    if (filteredChallenges.length > 0) {
+      const randomIndex = Math.floor(Math.random() * filteredChallenges.length);
+      onSelectProblem(filteredChallenges[randomIndex]);
+    }
+  };
+
   return (
     <div className="flex flex-col h-full">
       {/* Header */}
@@ -40,7 +48,7 @@ const ProblemSelector = ({
         </h1>
         
         {/* Problem Type Selector */}
-        <div className="flex justify-center gap-2">
+        <div className="flex justify-center gap-2 flex-wrap">
           <button
             onClick={() => setProblemType("coding")}
             className={cn(
@@ -64,6 +72,16 @@ const ProblemSelector = ({
           >
             <MessageCircle className="w-3.5 h-3.5" />
             Behavioral Questions
+          </button>
+          <button
+            onClick={handleRandomSelection}
+            className={cn(
+              "px-3 py-1.5 rounded-lg font-medium transition-all duration-200 flex items-center gap-1.5 text-sm",
+              "bg-card border border-border text-muted-foreground hover:border-primary/50 hover:bg-card/80"
+            )}
+          >
+            <Shuffle className="w-3.5 h-3.5" />
+            Random
           </button>
         </div>
       </div>

@@ -7,7 +7,7 @@ import ProblemSelector from "@/components/interview/ProblemSelector";
 import { Message } from "@/components/interview/ChatBubble";
 import { InterviewStatus } from "@/components/interview/StatusIndicator";
 import { CodingProblem, BehavioralQuestion, isCodingProblem } from "@/data/codingProblems";
-import { Code2, MessageSquare } from "lucide-react";
+import { Code2, MessageSquare, Clock } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 // Type declarations for Speech Recognition
@@ -104,6 +104,7 @@ const Interview = () => {
   const [isListening, setIsListening] = useState(false);
   const [pendingAICall, setPendingAICall] = useState(false);
   const [startTime, setStartTime] = useState<Date | null>(null);
+  const [elapsedSeconds, setElapsedSeconds] = useState(0);
   const recognitionRef = useRef<SpeechRecognition | null>(null);
   
   const addMessage = useCallback((role: "ai" | "user", content: string) => {
@@ -271,6 +272,17 @@ Please act as a professional behavioral interviewer. Ask follow-up questions to 
       setPendingAICall(false);
     }
   }, [pendingAICall, messages, callAI]);
+
+  // Interview timer
+  useEffect(() => {
+    if (!interviewStarted) return;
+    
+    const interval = setInterval(() => {
+      setElapsedSeconds(prev => prev + 1);
+    }, 1000);
+    
+    return () => clearInterval(interval);
+  }, [interviewStarted]);
   
   const handleSelectProblem = (problem: CodingProblem | BehavioralQuestion) => {
     setSelectedProblem(problem);
@@ -280,6 +292,7 @@ Please act as a professional behavioral interviewer. Ask follow-up questions to 
     if (selectedProblem) {
       setInterviewStarted(true);
       setStartTime(new Date());
+      setElapsedSeconds(0);
       if (isCodingProblem(selectedProblem)) {
         setShowCodePanel(true); // Show code panel immediately so user can see the problem
       }
@@ -318,7 +331,18 @@ Please act as a professional behavioral interviewer. Ask follow-up questions to 
       window.speechSynthesis.cancel();
     }
     // Navigate back to problem selector
-    navigate("/");
+    setInterviewStarted(false);
+    const minutes = Math.floor(elapsedSeconds / 60);
+    const seconds = elapsedSeconds % 60;
+    const duration = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+    navigate("/results", { 
+      state: { 
+        messages,
+        duration,
+        questionsAnswered: messages.filter(m => m.role === 'user').length,
+        submittedCode: lastSubmittedCode
+      } 
+    });
   };
   
   const handleCodeSubmit = (code: string) => {
@@ -402,9 +426,17 @@ Please act as a professional behavioral interviewer. Ask follow-up questions to 
           <div className="hidden md:flex flex-1">
             {/* Left Panel - Transcript */}
             <div className={cn(
-              "bg-card border-border border-r transition-all duration-300",
+              "bg-card border-border border-r transition-all duration-300 flex flex-col",
               showCodePanel ? "w-1/2" : "w-full"
             )}>
+              {interviewStarted && (
+                <div className="px-6 py-3 border-border border-b flex items-center gap-2">
+                  <Clock className="w-4 h-4 text-muted-foreground" />
+                  <span className="text-sm font-medium text-muted-foreground">
+                    {Math.floor(elapsedSeconds / 60).toString().padStart(2, '0')}:{(elapsedSeconds % 60).toString().padStart(2, '0')}
+                  </span>
+                </div>
+              )}
               <TranscriptPanel
                 messages={messages}
                 status={status}
@@ -426,21 +458,31 @@ Please act as a professional behavioral interviewer. Ask follow-up questions to 
           </div>
           
           {/* Mobile: Single Panel */}
-          <div className="md:hidden flex-1 pb-16">
-            {!showCodePanel ? (
-              <TranscriptPanel
-                messages={messages}
-                status={status}
-                isRecording={isRecording}
-                onToggleRecording={handleToggleRecording}
-                onEndInterview={handleEndInterview}
-              />
-            ) : selectedProblem ? (
-              <CodeEditorPanel
-                problem={selectedProblem}
-                onSubmit={handleCodeSubmit}
-              />
-            ) : null}
+          <div className="md:hidden flex-1 pb-16 flex flex-col">
+            {interviewStarted && (
+              <div className="px-6 py-3 border-border border-b flex items-center gap-2">
+                <Clock className="w-4 h-4 text-muted-foreground" />
+                <span className="text-sm font-medium text-muted-foreground">
+                  {Math.floor(elapsedSeconds / 60).toString().padStart(2, '0')}:{(elapsedSeconds % 60).toString().padStart(2, '0')}
+                </span>
+              </div>
+            )}
+            <div className="flex-1">
+              {!showCodePanel ? (
+                <TranscriptPanel
+                  messages={messages}
+                  status={status}
+                  isRecording={isRecording}
+                  onToggleRecording={handleToggleRecording}
+                  onEndInterview={handleEndInterview}
+                />
+              ) : selectedProblem ? (
+                <CodeEditorPanel
+                  problem={selectedProblem}
+                  onSubmit={handleCodeSubmit}
+                />
+              ) : null}
+            </div>
           </div>
         </div>
       </main>
