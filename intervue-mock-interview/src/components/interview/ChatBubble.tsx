@@ -25,7 +25,7 @@ const ChatBubble = ({ message }: ChatBubbleProps) => {
         isAI ? "gradient-primary" : "bg-secondary"
       )}>
         {isAI ? (
-          <img src="/mockr_logo.png" alt="Mockr" className="w-full h-full object-cover" />
+          <img src="/mockr_logo_noborder.png" alt="Mockr" className="w-full h-full object-cover" />
         ) : (
           <User className="w-4 h-4 text-secondary-foreground" />
         )}
