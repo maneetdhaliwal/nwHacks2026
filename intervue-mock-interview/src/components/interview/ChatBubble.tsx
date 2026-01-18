@@ -1,5 +1,5 @@
 import { cn } from "@/lib/utils";
-import { Bot, User } from "lucide-react";
+import { User } from "lucide-react";
 
 export interface Message {
   id: string;
@@ -21,11 +21,11 @@ const ChatBubble = ({ message }: ChatBubbleProps) => {
       isAI ? "flex-row" : "flex-row-reverse"
     )}>
       <div className={cn(
-        "flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center",
+        "flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center overflow-hidden",
         isAI ? "gradient-primary" : "bg-secondary"
       )}>
         {isAI ? (
-          <Bot className="w-4 h-4 text-primary-foreground" />
+          <img src="/mockr_logo.png" alt="Mockr" className="w-full h-full object-cover" />
         ) : (
           <User className="w-4 h-4 text-secondary-foreground" />
         )}

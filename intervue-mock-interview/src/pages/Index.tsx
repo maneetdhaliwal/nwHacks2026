@@ -1,11 +1,11 @@
 import { Link } from "react-router-dom";
 import Header from "@/components/ui/Header";
 import { Button } from "@/components/ui/button";
-import { Bot, Code2, MessageSquare, Zap, ArrowRight, Sparkles } from "lucide-react";
+import { Code2, MessageSquare, Zap, ArrowRight, Sparkles } from "lucide-react";
 
 const features = [
   {
-    icon: Bot,
+    icon: Code2,
     title: "AI Voice Interviewer",
     description: "Practice with a realistic AI interviewer that asks follow-up questions and adapts to your responses.",
   },
@@ -79,8 +79,8 @@ const Index = () => {
               <div className="grid md:grid-cols-2 divide-x divide-border">
                 <div className="p-6 space-y-4">
                   <div className="flex items-start gap-3">
-                    <div className="w-8 h-8 rounded-lg gradient-primary flex items-center justify-center flex-shrink-0">
-                      <Bot className="w-4 h-4 text-primary-foreground" />
+                    <div className="w-8 h-8 rounded-lg gradient-primary flex items-center justify-center flex-shrink-0 overflow-hidden">
+                      <img src="/mockr_logo.png" alt="Mockr" className="w-full h-full object-cover" />
                     </div>
                     <div className="bg-card border border-border rounded-2xl rounded-tl-sm px-4 py-3 text-sm">
                       Let's start with a classic. Can you explain how you would implement a function to find two numbers in an array that sum to a target value?
@@ -170,8 +170,8 @@ const Index = () => {
       <footer className="border-t border-border py-8 px-6">
         <div className="container mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg gradient-primary flex items-center justify-center">
-              <Bot className="w-4 h-4 text-primary-foreground" />
+            <div className="w-8 h-8 rounded-lg gradient-primary flex items-center justify-center overflow-hidden">
+              <img src="/mockr_logo.png" alt="Mockr" className="w-full h-full object-cover" />
             </div>
             <span className="font-semibold">Mockr</span>
           </div>
