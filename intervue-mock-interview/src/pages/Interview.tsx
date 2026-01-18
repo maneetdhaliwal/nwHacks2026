@@ -15,6 +15,16 @@ const mockProblem = {
     "Input: nums = [2,7,11,15], target = 9\nOutput: [0,1]\nExplanation: nums[0] + nums[1] = 2 + 7 = 9",
     "Input: nums = [3,2,4], target = 6\nOutput: [1,2]",
   ],
+  testCases: [
+    { input: [[2, 7, 11, 15], 9], expected: [0, 1], description: "Basic case" },
+    { input: [[3, 2, 4], 6], expected: [1, 2], description: "Non-sequential indices" },
+    { input: [[3, 3], 6], expected: [0, 1], description: "Duplicate numbers" },
+  ],
+  starterCode: `function solution(nums, target) {
+  // Write your code here
+  // Return the indices of the two numbers that add up to target
+  
+}`,
 };
 
 const mockConversation: Omit<Message, "id" | "timestamp">[] = [
@@ -108,32 +118,32 @@ const Interview = () => {
   };
   
   return (
-    <div className="min-h-screen bg-background flex flex-col">
+    <div className="flex flex-col bg-background min-h-screen">
       <Header />
       
       <main className="flex-1 pt-16">
-        <div className="h-[calc(100vh-4rem)] flex">
+        <div className="flex h-[calc(100vh-4rem)]">
           {/* Mode Tabs - Mobile */}
-          <div className="md:hidden fixed bottom-0 left-0 right-0 z-20 border-t border-border bg-card/95 backdrop-blur-sm flex">
+          <div className="md:hidden right-0 bottom-0 left-0 z-20 fixed flex bg-card/95 backdrop-blur-sm border-border border-t">
             <button
               onClick={() => setShowCodePanel(false)}
               className={cn(
-                "flex-1 flex items-center justify-center gap-2 py-4 transition-colors",
+                "flex flex-1 justify-center items-center gap-2 py-4 transition-colors",
                 !showCodePanel ? "text-primary" : "text-muted-foreground"
               )}
             >
               <MessageSquare className="w-5 h-5" />
-              <span className="text-sm font-medium">Chat</span>
+              <span className="font-medium text-sm">Chat</span>
             </button>
             <button
               onClick={() => setShowCodePanel(true)}
               className={cn(
-                "flex-1 flex items-center justify-center gap-2 py-4 transition-colors",
+                "flex flex-1 justify-center items-center gap-2 py-4 transition-colors",
                 showCodePanel ? "text-primary" : "text-muted-foreground"
               )}
             >
               <Code2 className="w-5 h-5" />
-              <span className="text-sm font-medium">Code</span>
+              <span className="font-medium text-sm">Code</span>
             </button>
           </div>
           
@@ -141,7 +151,7 @@ const Interview = () => {
           <div className="hidden md:flex flex-1">
             {/* Left Panel - Transcript */}
             <div className={cn(
-              "border-r border-border bg-card transition-all duration-300",
+              "bg-card border-border border-r transition-all duration-300",
               showCodePanel ? "w-1/2" : "w-full"
             )}>
               <TranscriptPanel
