@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Play, Send, Code2 } from "lucide-react";
 import ConsoleOutput from "./ConsoleOutput";
 import { runTests, TestCase, TestRunResult } from "@/lib/testRunner";
+import { Editor } from "@monaco-editor/react"
 
 interface CodeEditorPanelProps {
   problem: {
@@ -36,6 +37,10 @@ const CodeEditorPanel = ({ problem, onSubmit }: CodeEditorPanelProps) => {
     onSubmit(code);
   };
 
+  const handleEditorChange = (value: string | undefined) => {
+    setCode(value || "");
+  };
+
   return (
     <div className="flex flex-col h-full">
       {/* Problem Description */}
@@ -58,6 +63,7 @@ const CodeEditorPanel = ({ problem, onSubmit }: CodeEditorPanelProps) => {
       
       {/* Code Editor */}
       <div className="flex flex-col flex-1 p-4 min-h-0">
+        
         <div className="flex-1 bg-background/50 border border-border rounded-lg overflow-hidden">
           <div className="flex items-center gap-2 bg-muted/30 px-3 py-2 border-border border-b">
             <div className="flex gap-1.5">
@@ -67,12 +73,28 @@ const CodeEditorPanel = ({ problem, onSubmit }: CodeEditorPanelProps) => {
             </div>
             <span className="ml-2 text-muted-foreground text-xs">solution.js</span>
           </div>
-          <textarea
-            value={code}
-            onChange={(e) => setCode(e.target.value)}
-            className="bg-transparent p-4 focus:outline-none w-full h-full min-h-[200px] font-mono text-foreground text-sm resize-none"
-            spellCheck={false}
-          />
+            <Editor
+              height="100%"
+              defaultLanguage="javascript"
+              value={code}
+              onChange={handleEditorChange}
+              theme="vs-dark"
+              options={{
+                minimap: { enabled: false },
+                fontSize: 14,
+                fontFamily: "'JetBrains Mono', monospace",
+                lineNumbers: "on",
+                scrollBeyondLastLine: false,
+                automaticLayout: true,
+                tabSize: 2,
+                wordWrap: "on",
+                padding: { top: 16, bottom: 16 },
+                scrollbar: {
+                  vertical: "auto",
+                  horizontal: "auto",
+                },
+              }}
+            />
         </div>
         
         {/* Console */}

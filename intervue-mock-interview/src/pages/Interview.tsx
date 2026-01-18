@@ -3,40 +3,17 @@ import { useNavigate } from "react-router-dom";
 import Header from "@/components/ui/Header";
 import TranscriptPanel from "@/components/interview/TranscriptPanel";
 import CodeEditorPanel from "@/components/interview/CodeEditorPanel";
+import ProblemSelector from "@/components/interview/ProblemSelector";
 import { Message } from "@/components/interview/ChatBubble";
 import { InterviewStatus } from "@/components/interview/StatusIndicator";
+import { CodingProblem } from "@/data/codingProblems";
 import { Code2, MessageSquare } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-const mockProblem = {
-  title: "Two Sum",
-  description: "Given an array of integers nums and an integer target, return indices of the two numbers such that they add up to target. You may assume that each input would have exactly one solution, and you may not use the same element twice.",
-  examples: [
-    "Input: nums = [2,7,11,15], target = 9\nOutput: [0,1]\nExplanation: nums[0] + nums[1] = 2 + 7 = 9",
-    "Input: nums = [3,2,4], target = 6\nOutput: [1,2]",
-  ],
-  testCases: [
-    { input: [[2, 7, 11, 15], 9], expected: [0, 1], description: "Basic case" },
-    { input: [[3, 2, 4], 6], expected: [1, 2], description: "Non-sequential indices" },
-    { input: [[3, 3], 6], expected: [0, 1], description: "Duplicate numbers" },
-  ],
-  starterCode: `function solution(nums, target) {
-  // Write your code here
-  // Return the indices of the two numbers that add up to target
-  
-}`,
-};
-
-const mockConversation: Omit<Message, "id" | "timestamp">[] = [
-  { role: "ai", content: "Hello! Welcome to your technical interview. I'm here to assess your problem-solving skills and coding abilities. Are you ready to begin?" },
-  { role: "user", content: "Yes, I'm ready! Let's do this." },
-  { role: "ai", content: "Great enthusiasm! Let's start with a classic problem. I'd like you to solve the Two Sum problem. Given an array of integers and a target sum, find two numbers that add up to the target. Can you explain your approach first?" },
-  { role: "user", content: "I would use a hash map to store the complement of each number as I iterate through the array. For each number, I check if it exists in the map, which gives us O(n) time complexity." },
-  { role: "ai", content: "Excellent explanation! You've correctly identified the optimal approach using a hash map. The O(n) time complexity is indeed better than the brute force O(n²) solution. Now, let's see you implement it. I'll open the coding sandbox for you." },
-];
-
 const Interview = () => {
   const navigate = useNavigate();
+  const [selectedProblem, setSelectedProblem] = useState<CodingProblem | null>(null);
+  const [interviewStarted, setInterviewStarted] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [status, setStatus] = useState<InterviewStatus>("idle");
   const [isRecording, setIsRecording] = useState(false);
@@ -54,14 +31,18 @@ const Interview = () => {
   }, []);
   
   const simulateConversation = useCallback(() => {
-    if (messageIndex >= mockConversation.length) {
+    if (!selectedProblem) return;
+    
+    const conversation = selectedProblem.aiConversation;
+    
+    if (messageIndex >= conversation.length) {
       // Show code panel after conversation
       setShowCodePanel(true);
       setStatus("idle");
       return;
     }
     
-    const msg = mockConversation[messageIndex];
+    const msg = conversation[messageIndex];
     
     if (msg.role === "ai") {
       setStatus("speaking");
@@ -83,7 +64,17 @@ const Interview = () => {
         setTimeout(() => simulateConversation(), 1000);
       }, 1000);
     }
-  }, [messageIndex, addMessage]);
+  }, [messageIndex, addMessage, selectedProblem]);
+  
+  const handleSelectProblem = (problem: CodingProblem) => {
+    setSelectedProblem(problem);
+  };
+
+  const handleStartInterview = () => {
+    if (selectedProblem) {
+      setInterviewStarted(true);
+    }
+  };
   
   const handleToggleRecording = () => {
     if (!isRecording) {
@@ -116,6 +107,24 @@ const Interview = () => {
     addMessage("ai", "Great solution! Your implementation correctly uses a hash map and handles the edge cases well. Let's move on to discuss the time and space complexity of your solution.");
     setShowCodePanel(false);
   };
+
+  // Show problem selector if interview hasn't started
+  if (!interviewStarted) {
+    return (
+      <div className="flex flex-col bg-background min-h-screen">
+        <Header />
+        <main className="flex-1 pt-16">
+          <div className="h-[calc(100vh-4rem)]">
+            <ProblemSelector
+              selectedProblem={selectedProblem}
+              onSelectProblem={handleSelectProblem}
+              onStartInterview={handleStartInterview}
+            />
+          </div>
+        </main>
+      </div>
+    );
+  }
   
   return (
     <div className="flex flex-col bg-background min-h-screen">
@@ -164,10 +173,10 @@ const Interview = () => {
             </div>
             
             {/* Right Panel - Code Editor */}
-            {showCodePanel && (
+            {showCodePanel && selectedProblem && (
               <div className="w-1/2 animate-slide-in-right">
                 <CodeEditorPanel
-                  problem={mockProblem}
+                  problem={selectedProblem}
                   onSubmit={handleCodeSubmit}
                 />
               </div>
@@ -184,12 +193,12 @@ const Interview = () => {
                 onToggleRecording={handleToggleRecording}
                 onEndInterview={handleEndInterview}
               />
-            ) : (
+            ) : selectedProblem ? (
               <CodeEditorPanel
-                problem={mockProblem}
+                problem={selectedProblem}
                 onSubmit={handleCodeSubmit}
               />
-            )}
+            ) : null}
           </div>
         </div>
       </main>
