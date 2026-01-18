@@ -103,6 +103,7 @@ const Interview = () => {
   const [showCodePanel, setShowCodePanel] = useState(false);
   const [isListening, setIsListening] = useState(false);
   const [pendingAICall, setPendingAICall] = useState(false);
+  const [startTime, setStartTime] = useState<Date | null>(null);
   const recognitionRef = useRef<SpeechRecognition | null>(null);
   
   const addMessage = useCallback((role: "ai" | "user", content: string) => {
@@ -258,6 +259,7 @@ Please act as a professional coding interviewer. Ask relevant questions about th
   const handleStartInterview = () => {
     if (selectedProblem) {
       setInterviewStarted(true);
+      setStartTime(new Date());
       setShowCodePanel(true); // Show code panel immediately so user can see the problem
       // Add initial AI message
       const initialMessage = selectedProblem.aiConversation[0].content;
@@ -302,12 +304,23 @@ Please act as a professional coding interviewer. Ask relevant questions about th
     if ('speechSynthesis' in window) {
       window.speechSynthesis.cancel();
     }
+    
+    // Calculate actual interview metrics
+    const endTime = new Date();
+    const durationMs = startTime ? endTime.getTime() - startTime.getTime() : 0;
+    const durationMinutes = Math.floor(durationMs / 60000);
+    const durationSeconds = Math.floor((durationMs % 60000) / 1000);
+    const duration = `${durationMinutes}:${durationSeconds.toString().padStart(2, '0')}`;
+    
+    // Count user messages (questions answered)
+    const questionsAnswered = messages.filter(msg => msg.role === 'user').length;
+    
     // Navigate to results with interview data
     navigate("/results", {
       state: {
         messages,
-        duration: "12:34",
-        questionsAnswered: 3,
+        duration,
+        questionsAnswered,
         submittedCode: code,
       }
     });

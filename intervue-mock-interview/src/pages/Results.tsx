@@ -1,4 +1,5 @@
 import { useLocation, useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
 import Header from "@/components/ui/Header";
 import { Button } from "@/components/ui/button";
 import { 
@@ -10,7 +11,8 @@ import {
   TrendingUp,
   RotateCcw,
   Download,
-  Share2
+  Share2,
+  Loader2
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -23,46 +25,180 @@ interface FeedbackSection {
   improvements: string[];
 }
 
+interface Message {
+  id: string;
+  role: "ai" | "user";
+  content: string;
+  timestamp: Date;
+}
+
 const Results = () => {
   const location = useLocation();
   const navigate = useNavigate();
   
-  const { duration = "12:34", questionsAnswered = 3 } = location.state || {};
+  const { messages = [], duration = "12:34", questionsAnswered = 3, submittedCode } = location.state || {};
   
-  const overallScore = 82;
-  
-  const feedbackSections: FeedbackSection[] = [
-    {
-      title: "Communication",
-      icon: MessageSquare,
-      score: 85,
-      feedback: "You demonstrated clear and structured communication throughout the interview. Your explanations were well-organized and easy to follow.",
-      highlights: [
-        "Clear problem breakdown",
-        "Good use of technical terminology",
-        "Asked clarifying questions",
-      ],
-      improvements: [
-        "Consider pausing before answering complex questions",
-        "Elaborate more on trade-offs between solutions",
-      ],
-    },
-    {
-      title: "Technical Skills",
-      icon: Code2,
-      score: 78,
-      feedback: "Solid understanding of data structures and algorithms. Your hash map solution was optimal and well-implemented.",
-      highlights: [
-        "Correct time/space complexity analysis",
-        "Clean code structure",
-        "Handled edge cases well",
-      ],
-      improvements: [
-        "Consider discussing alternative approaches first",
-        "Add more inline comments for complex logic",
-      ],
-    },
-  ];
+  const [overallScore, setOverallScore] = useState<number | null>(null);
+  const [feedbackSections, setFeedbackSections] = useState<FeedbackSection[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const analyzeInterview = async (conversationMessages: Message[], code?: string) => {
+    try {
+      const apiKey = import.meta.env.VITE_OPENROUTER_API_KEY;
+      if (!apiKey) {
+        throw new Error('OpenRouter API key not found');
+      }
+
+      const conversationText = conversationMessages
+        .map(msg => `${msg.role === 'ai' ? 'Interviewer' : 'Candidate'}: ${msg.content}`)
+        .join('\n\n');
+
+      const systemPrompt = `You are an expert coding interview evaluator. Analyze the following interview conversation and provide detailed feedback in JSON format.
+
+Return a JSON object with this exact structure:
+{
+  "overallScore": <number between 0-100>,
+  "communication": {
+    "score": <number 0-100>,
+    "feedback": "<detailed paragraph about communication skills>",
+    "highlights": ["<positive point 1>", "<positive point 2>", "<positive point 3>"],
+    "improvements": ["<improvement suggestion 1>", "<improvement suggestion 2>"]
+  },
+  "technicalSkills": {
+    "score": <number 0-100>,
+    "feedback": "<detailed paragraph about technical skills>",
+    "highlights": ["<positive point 1>", "<positive point 2>", "<positive point 3>"],
+    "improvements": ["<improvement suggestion 1>", "<improvement suggestion 2>"]
+  }
+}
+
+Guidelines for scoring:
+- Overall score: Average of communication and technical scores
+- Communication: How clearly they explained concepts, asked questions, structured responses. Penalize heavily for minimal or no participation.
+- Technical: Understanding of algorithms, problem-solving approach, code quality. Give very low scores for no code submission or minimal effort.
+
+IMPORTANT SCORING RULES:
+- If the candidate submitted no code or just empty/whitespace code: technical score should be 0-20
+- If the candidate had no conversation or only 1-2 minimal responses: communication score should be 0-30, overall score 0-25
+- If the candidate showed no understanding of the problem: technical score should be 0-40
+- Be extremely critical of candidates who did minimal work - they should receive scores in the 0-30 range
+- Only give high scores (70+) for candidates who actively engaged, wrote substantial code, and demonstrated problem-solving skills
+
+Be constructive but realistic. Focus on JavaScript programming concepts. Base scores on actual evidence from the conversation and code.`;
+
+      const userPrompt = `Please analyze this coding interview conversation:
+
+${conversationText}
+
+${code ? `Submitted Code:\n${code}` : 'NO CODE SUBMITTED'}
+
+ANALYSIS REQUIREMENTS:
+- Count the number of candidate responses: ${conversationMessages.filter(msg => msg.role === 'user').length}
+- Code submitted: ${code && code.trim().length > 10 ? 'Yes' : 'No'}
+- If no code or minimal conversation, give very low scores (0-30 range)
+- If substantial code and active conversation, consider higher scores
+- Be specific about what the candidate actually did vs generic praise
+
+Provide detailed feedback on the candidate's actual performance.`;
+
+      const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${apiKey}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          model: 'anthropic/claude-3-haiku',
+          messages: [
+            { role: 'system', content: systemPrompt },
+            { role: 'user', content: userPrompt }
+          ],
+          temperature: 0.7,
+        }),
+      });
+
+      const data = await response.json();
+      
+      if (!data.choices || !data.choices[0]) {
+        throw new Error('Invalid response from AI service');
+      }
+
+      const analysisText = data.choices[0].message.content;
+      
+      // Parse the JSON response
+      const analysis = JSON.parse(analysisText);
+      
+      setOverallScore(analysis.overallScore);
+      
+      const sections: FeedbackSection[] = [
+        {
+          title: "Communication",
+          icon: MessageSquare,
+          score: analysis.communication.score,
+          feedback: analysis.communication.feedback,
+          highlights: analysis.communication.highlights,
+          improvements: analysis.communication.improvements,
+        },
+        {
+          title: "Technical Skills",
+          icon: Code2,
+          score: analysis.technicalSkills.score,
+          feedback: analysis.technicalSkills.feedback,
+          highlights: analysis.technicalSkills.highlights,
+          improvements: analysis.technicalSkills.improvements,
+        },
+      ];
+      
+      setFeedbackSections(sections);
+      setIsLoading(false);
+    } catch (err) {
+      console.error('Error analyzing interview:', err);
+      setError('Failed to generate feedback. Please try again.');
+      setIsLoading(false);
+      
+      // Fallback to basic feedback - assume minimal effort
+      const userMessages = conversationMessages.filter(msg => msg.role === 'user');
+      const hasCode = code && code.trim().length > 10; // More than just whitespace/comments
+      
+      let fallbackScore = 15; // Very low default
+      if (userMessages.length > 2) fallbackScore += 10;
+      if (hasCode) fallbackScore += 15;
+      
+      setOverallScore(fallbackScore);
+      setFeedbackSections([
+        {
+          title: "Communication",
+          icon: MessageSquare,
+          score: Math.min(userMessages.length * 8, 30), // Max 30 for minimal participation
+          feedback: userMessages.length === 0 
+            ? "No communication was observed during the interview. The candidate did not engage with the interviewer or provide any responses."
+            : `Limited communication was observed with only ${userMessages.length} response${userMessages.length === 1 ? '' : 's'}. The candidate showed minimal engagement with the interview process.`,
+          highlights: userMessages.length > 0 ? ["Attempted to participate"] : [],
+          improvements: ["Engage more actively with the interviewer", "Ask clarifying questions", "Explain your thought process"],
+        },
+        {
+          title: "Technical Skills",
+          icon: Code2,
+          score: hasCode ? 25 : 5,
+          feedback: !hasCode
+            ? "No code was submitted or the submitted code was empty. The candidate did not attempt to solve the coding problem."
+            : "Minimal code was submitted but showed basic understanding. However, the solution was incomplete and did not demonstrate problem-solving skills.",
+          highlights: hasCode ? ["Submitted some code"] : [],
+          improvements: ["Write complete, working solutions", "Test your code thoroughly", "Consider edge cases and error handling"],
+        },
+      ]);
+    }
+  };
+
+  useEffect(() => {
+    if (messages.length > 0) {
+      analyzeInterview(messages, submittedCode);
+    } else {
+      setIsLoading(false);
+      setError('No interview data available');
+    }
+  }, [messages, submittedCode]);
   
   const getScoreColor = (score: number) => {
     if (score >= 80) return "text-success";
@@ -95,11 +231,25 @@ const Results = () => {
               Your Interview Results
             </h1>
             <p className="text-muted-foreground text-lg">
-              Here's a detailed breakdown of your performance
+              {isLoading ? 'Analyzing your performance...' : 'Here\'s a detailed breakdown of your performance'}
             </p>
           </div>
           
-          {/* Overall Score Card */}
+          {isLoading ? (
+            <div className="flex flex-col justify-center items-center py-20">
+              <Loader2 className="mb-4 w-12 h-12 text-primary animate-spin" />
+              <p className="text-muted-foreground">Generating personalized feedback...</p>
+            </div>
+          ) : error ? (
+            <div className="py-20 text-center">
+              <p className="mb-4 text-destructive">{error}</p>
+              <Button onClick={() => navigate("/")}>
+                Return to Problem Selection
+              </Button>
+            </div>
+          ) : overallScore !== null ? (
+            <>
+              {/* Overall Score Card */}
           <div className="relative mb-8 p-8 border border-border rounded-2xl overflow-hidden gradient-card">
             <div className="absolute inset-0 opacity-20" style={{ background: 'var(--gradient-glow)' }} />
             <div className="z-10 relative flex md:flex-row flex-col justify-between items-center gap-8">
@@ -235,11 +385,13 @@ const Results = () => {
               </div>
             ))}
           </div>
+            </>
+          ) : null}
           
           {/* Actions */}
           <div className="flex sm:flex-row flex-col justify-center items-center gap-4">
             <Button
-              onClick={() => navigate("/interview")}
+              onClick={() => navigate("/")}
               size="lg"
               className="hover:opacity-90 w-full sm:w-auto text-primary-foreground gradient-primary glow-primary"
             >
